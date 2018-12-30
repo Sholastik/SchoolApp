@@ -10,12 +10,15 @@ import com.sholastik.schoolapp.R;
 public class Day {
 
     @PrimaryKey
-    public final int mDayOfWeek;
-    public final String mName;
+    public int mDayOfWeek;
+    public String mName;
 
     public Day(Context context, int dayOfWeek) {
         mDayOfWeek = dayOfWeek;
         mName = context.getResources().getStringArray(R.array.day_of_week)[mDayOfWeek];
+    }
+
+    public Day() {
     }
 
 }
