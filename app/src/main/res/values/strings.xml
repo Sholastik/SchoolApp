@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">SchoolApp</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Настройки</string>
+    <string name="schedule_header">Расписание</string>
+    <string name="schedule_order">%d.</string>
+    <string name="schedule_time">%s - %s</string>
+    <string-array name="day_of_week">
+        <item>Понедельник</item>
+        <item>Вторник</item>
+        <item>Среда</item>
+        <item>Четверг</item>
+        <item>Пятница</item>
+        <item>Суббота</item>
+        <item>Воскресенье</item>
+    </string-array>
+    <string name="time">%s:%s</string>
+    <string name="editor_lesson_tip">Название урока</string>
+    <string name="editor_start_of_lesson_tip">Время начала урока</string>
+    <string name="editor_length_of_lesson_tip">Продолжительность урока</string>
+    <string name="lesson_length">%d мин</string>
+    <string name="start_time_picker">Начало урока</string>
+    <string name="length_picker_hours">Часы</string>
+    <string name="length_picker_minutes">Минуты</string>
+    <string name="no_lessons">Нет уроков</string>
+    <string name="add_new_lesson">Новый урок</string>
+    <string name="new_lesson">Урок</string>
+    <string name="remove_lesson">Удалить урок</string>
+</resources>
