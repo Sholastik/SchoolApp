@@ -17,15 +17,18 @@ import static android.arch.persistence.room.ForeignKey.CASCADE;
         onDelete = CASCADE))
 public class Lesson {
     @PrimaryKey(autoGenerate = true)
+    public int mIndex;
     public int mId;
     public long mStartTime;
     public long mLength;
     public String mName;
     public int mDayOfWeek;
 
-    public Lesson(Context context, int dayOfWeek) {
+    public Lesson(Context context, int dayOfWeek, int index) {
         mName = context.getString(R.string.new_lesson);
         mDayOfWeek = dayOfWeek;
+        mIndex = index;
+
         Calendar startTimeCalendar = Calendar.getInstance();
         startTimeCalendar.set(Calendar.HOUR, 8);
         startTimeCalendar.set(Calendar.MINUTE, 15);
