@@ -1,35 +1,21 @@
 package com.sholastik.schoolapp.ScheduleCode;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 import android.content.Context;
 
-import java.util.ArrayList;
+import com.sholastik.schoolapp.R;
 
+@Entity(tableName = "days")
 public class Day {
-    private ArrayList<Lesson> mLessons;
 
-    Day() {
-        mLessons = new ArrayList<>();
+    @PrimaryKey
+    public final int mDayOfWeek;
+    public final String mName;
+
+    public Day(Context context, int dayOfWeek) {
+        mDayOfWeek = dayOfWeek;
+        mName = context.getResources().getStringArray(R.array.day_of_week)[mDayOfWeek];
     }
 
-    Lesson getLesson(int lessonIndex) {
-        return mLessons.get(lessonIndex);
-    }
-
-    void addLesson(Context context) {
-        mLessons.add(new Lesson(context));
-    }
-
-    public void removeLesson(Lesson lesson) {
-        mLessons.remove(lesson);
-        mLessons.trimToSize();
-    }
-
-    void removeLesson(int lessonIndex) {
-        mLessons.remove(lessonIndex);
-        mLessons.trimToSize();
-    }
-
-    public int size() {
-        return mLessons.size();
-    }
 }
