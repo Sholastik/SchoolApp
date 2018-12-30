@@ -26,7 +26,7 @@ public interface ScheduleDao {
     void delete(Day day);
 
     //Lessons
-    @Query("SELECT * FROM lessons WHERE mDayOfWeek = :dayOfWeek")
+    @Query("SELECT * FROM lessons WHERE mDayOfWeek = :dayOfWeek ORDER BY mIndex")
     List<Lesson> getLessonsByDay(int dayOfWeek);
 
     @Insert
