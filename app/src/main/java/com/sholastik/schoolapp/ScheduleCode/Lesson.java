@@ -12,8 +12,8 @@ import java.util.Calendar;
 import static android.arch.persistence.room.ForeignKey.CASCADE;
 
 @Entity(tableName = "lessons", foreignKeys = @ForeignKey(entity = Day.class,
-        parentColumns = "mId",
-        childColumns = "mDayOfWeek",
+        parentColumns = "mDayOfWeek",
+        childColumns = "mIndex",
         onDelete = CASCADE))
 public class Lesson {
     @PrimaryKey(autoGenerate = true)
@@ -38,5 +38,8 @@ public class Lesson {
         lengthCalendar.set(Calendar.HOUR, 0);
         lengthCalendar.set(Calendar.MINUTE, 45);
         mLength = lengthCalendar.getTime().getTime();
+    }
+
+    public Lesson() {
     }
 }
