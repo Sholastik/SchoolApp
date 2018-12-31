@@ -77,8 +77,8 @@ public class ScheduleFragment extends Fragment {
                 String name = lesson.mName;
                 String time = getString(
                         R.string.schedule_time,
-                        new SimpleDateFormat("H:mm", Locale.getDefault()).format(lesson.mStartTime),
-                        new SimpleDateFormat("H:mm", Locale.getDefault()).format(lesson.mStartTime + lesson.mLength)
+                        new SimpleDateFormat("H:mm", Locale.getDefault()).format(lesson.getStartTime()),
+                        new SimpleDateFormat("H:mm", Locale.getDefault()).format(lesson.getEndTime())
                 );
                 mLessonsTextView.append(String.format("%s    %s    %s\n", order, name, time));
             }
