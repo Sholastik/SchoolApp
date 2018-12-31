@@ -18,6 +18,7 @@ import com.sholastik.schoolapp.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 
 import static com.sholastik.schoolapp.ScheduleCode.EditorActivity.TO_BE_UPDATED;
 
@@ -32,7 +33,7 @@ public class ScheduleFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater
-                .inflate(R.layout.schedule_recyclerview, container, false);
+                .inflate(R.layout.schedule_recycler_view, container, false);
         mRecyclerView = view.findViewById(R.id.schedule_recyclerview);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         updateUI(null);
@@ -56,8 +57,8 @@ public class ScheduleFragment extends Fragment {
 
         void bind() {
             mDay = QueryHandler.getDay(getContext(), getAdapterPosition());
-            mDayOfWeekTextView.setText(mDay.mName);
-            if (QueryHandler.getLessonsByDay(getContext(), mDay.mDayOfWeek).size() == 0) {
+            mDayOfWeekTextView.setText(Objects.requireNonNull(mDay).mName);
+            if (Objects.requireNonNull(QueryHandler.getLessonsByDay(getContext(), mDay.mDayOfWeek)).size() == 0) {
                 mLessonsTextView.setVisibility(View.INVISIBLE);
                 mNoLessonsTextView.setVisibility(View.VISIBLE);
                 mNoLessonsTextView.setText(R.string.no_lessons);
@@ -71,7 +72,7 @@ public class ScheduleFragment extends Fragment {
             }
 
             //TODO: Rewrite this whole crap!
-            for (Lesson lesson : QueryHandler.getLessonsByDay(getContext(), mDay.mDayOfWeek)) {
+            for (Lesson lesson : Objects.requireNonNull(QueryHandler.getLessonsByDay(getContext(), mDay.mDayOfWeek))) {
                 String order = getString(R.string.schedule_order, lesson.mIndex + 1);
                 String name = lesson.mName;
                 String time = getString(
@@ -105,11 +106,11 @@ public class ScheduleFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            if (QueryHandler.getDays(getContext()).size() == 0) {
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, new ScheduleFragment()).commit();
+            if (Objects.requireNonNull(QueryHandler.getDays(getContext())).size() == 0) {
+                Objects.requireNonNull(getActivity()).getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, new ScheduleFragment()).commit();
                 return 0;
             }
-            return QueryHandler.getDays(getContext()).size();
+            return Objects.requireNonNull(QueryHandler.getDays(getContext())).size();
         }
     }
 
