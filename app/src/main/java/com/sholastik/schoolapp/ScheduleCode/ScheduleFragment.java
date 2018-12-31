@@ -34,7 +34,7 @@ public class ScheduleFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater
                 .inflate(R.layout.schedule_recycler_view, container, false);
-        mRecyclerView = view.findViewById(R.id.schedule_recyclerview);
+        mRecyclerView = view.findViewById(R.id.schedule_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         updateUI(null);
 
