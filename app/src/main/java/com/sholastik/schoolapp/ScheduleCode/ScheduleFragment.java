@@ -36,6 +36,7 @@ public class ScheduleFragment extends Fragment {
                 .inflate(R.layout.schedule_recycler_view, container, false);
         mRecyclerView = view.findViewById(R.id.schedule_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setItemViewCacheSize(7);
         updateUI(null);
 
         return view;
@@ -47,17 +48,17 @@ public class ScheduleFragment extends Fragment {
         private TextView mLessonsTextView;
         private TextView mNoLessonsTextView;
 
-        ViewHolder(LayoutInflater inflater, ViewGroup viewGroup) {
+        ViewHolder(LayoutInflater inflater, ViewGroup viewGroup, String name) {
             super(inflater.inflate(R.layout.schedule_item_day, viewGroup, false));
             itemView.setOnClickListener(this);
             mDayOfWeekTextView = itemView.findViewById(R.id.day_of_week);
             mLessonsTextView = itemView.findViewById(R.id.lessons_text_view);
             mNoLessonsTextView = itemView.findViewById(R.id.no_lessons_text_view);
+            mDayOfWeekTextView.setText(name);
         }
 
         void bind() {
             mDay = QueryHandler.getDay(getContext(), getAdapterPosition());
-            mDayOfWeekTextView.setText(Objects.requireNonNull(mDay).mName);
             if (Objects.requireNonNull(QueryHandler.getLessonsByDay(getContext(), mDay.mDayOfWeek)).size() == 0) {
                 mLessonsTextView.setVisibility(View.INVISIBLE);
                 mNoLessonsTextView.setVisibility(View.VISIBLE);
@@ -92,11 +93,16 @@ public class ScheduleFragment extends Fragment {
     }
 
     private class Adapter extends RecyclerView.Adapter<ViewHolder> {
+        int mI;
+
+        private Adapter() {
+            mI = 0;
+        }
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            return new ViewHolder(layoutInflater, viewGroup);
+            return new ViewHolder(layoutInflater, viewGroup, Objects.requireNonNull(QueryHandler.getDay(getContext(), mI++)).mName);
         }
 
         @Override
