@@ -36,12 +36,12 @@ import static com.sholastik.schoolapp.ScheduleCode.StartTimePicker.EXTRA_START_T
 
 public class EditorFragment extends Fragment {
 
-    public static final String DAY_EXTRA = "com.sholastik.schoolapp.ScheduleCode.EditorFragment";
-    public static final String DIALOG_START_TIME = "DialogStartTime";
-    public static final String DIALOG_LENGTH_TIME = "DialogLengthTime";
+    private static final String DAY_EXTRA = "com.sholastik.schoolapp.ScheduleCode.EditorFragment";
+    private static final String DIALOG_START_TIME = "DialogStartTime";
+    private static final String DIALOG_LENGTH_TIME = "DialogLengthTime";
 
-    public static final int REQUEST_START_TIME = 0;
-    public static final int REQUEST_LENGTH_TIME = 910521590;
+    private static final int REQUEST_START_TIME = 0;
+    private static final int REQUEST_LENGTH_TIME = 910521590;
 
     public static Fragment getFragment(int dayIndex) {
         Fragment fragment = new EditorFragment();
@@ -72,12 +72,12 @@ public class EditorFragment extends Fragment {
 
 
     private class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, TextWatcher {
-        private Button mStartTimeButton;
-        private Button mLengthButton;
-        private EditText mLessonNameEditText;
-        private TextView mLessonOrder;
+        private final Button mStartTimeButton;
+        private final Button mLengthButton;
+        private final EditText mLessonNameEditText;
+        private final TextView mLessonOrder;
         private Lesson mLesson;
-        private ImageView mRemoveLesson;
+        private final ImageView mRemoveLesson;
 
         ViewHolder(LayoutInflater inflater, ViewGroup viewGroup) {
             super(inflater.inflate(R.layout.editor_item, viewGroup, false));
@@ -91,7 +91,7 @@ public class EditorFragment extends Fragment {
 
         void bind(int index) {
             mLesson = QueryHandler.getLesson(getContext(), mDayIndex, index);
-            mLessonNameEditText.setText(mLesson.mName);
+            mLessonNameEditText.setText(Objects.requireNonNull(mLesson).mName);
             mLessonOrder.setText(getString(R.string.schedule_order, mLesson.mIndex + 1));
 
             mLengthButton.setText(getString(R.string.lesson_length, Integer.parseInt(new SimpleDateFormat("H", Locale.getDefault()).format(mLesson.mLength)) * 60 +
@@ -121,7 +121,6 @@ public class EditorFragment extends Fragment {
                 lengthTimePicker.show(fragmentManager, DIALOG_LENGTH_TIME);
             } else if (view == mRemoveLesson) {
                 QueryHandler.removeLesson(getContext(), mLesson);
-                QueryHandler.indexesUpdate(getContext(), mDayIndex);
                 Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemRemoved(mLesson.mIndex);
                 mRecyclerView.getAdapter().notifyItemRangeChanged(mLesson.mIndex, mRecyclerView.getAdapter().getItemCount() - mLesson.mIndex);
                 isChanged = true;
@@ -161,7 +160,7 @@ public class EditorFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return QueryHandler.getLessonsByDay(getContext(), mDayIndex).size();
+            return Objects.requireNonNull(QueryHandler.getLessonsByDay(getContext(), mDayIndex)).size();
         }
 
 
@@ -181,8 +180,8 @@ public class EditorFragment extends Fragment {
                             bundle.getInt(ARG_DAY_OF_WEEK),
                             bundle.getInt(ARG_INDEX));
 
-                    lesson.mStartTime = data.getLongExtra(EXTRA_START_TIME, 0);
-                    mRecyclerView.getAdapter().notifyItemChanged(lesson.mIndex);
+                    Objects.requireNonNull(lesson).mStartTime = data.getLongExtra(EXTRA_START_TIME, 0);
+                    Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemChanged(lesson.mIndex);
                         isChanged = true;
                 } else if (requestCode == REQUEST_LENGTH_TIME) {
                     Bundle bundle = data.getBundleExtra(EXTRA_BUNDLE);
@@ -190,8 +189,8 @@ public class EditorFragment extends Fragment {
                             bundle.getInt(ARG_DAY_OF_WEEK),
                             bundle.getInt(ARG_INDEX));
 
-                    lesson.mStartTime = data.getLongExtra(EXTRA_LENGTH_TIME, 0);
-                    mRecyclerView.getAdapter().notifyItemChanged(lesson.mIndex);
+                    Objects.requireNonNull(lesson).mStartTime = data.getLongExtra(EXTRA_LENGTH_TIME, 0);
+                    Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemChanged(lesson.mIndex);
                         isChanged = true;
                 }
             }
@@ -215,9 +214,9 @@ public class EditorFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.new_lesson: {
                 int index = Objects.requireNonNull(mRecyclerView.getAdapter()).getItemCount();
-                QueryHandler.insertLesson(getContext(), new Lesson(getContext(), mDayIndex, index));
+                QueryHandler.insertLesson(getContext(), new Lesson(Objects.requireNonNull(getContext()), mDayIndex, index));
                 isChanged = true;
-                Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemInserted(mRecyclerView.getAdapter().getItemCount() - 1);
+                Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemInserted(mRecyclerView.getAdapter().getItemCount());
                 mRecyclerView.scrollToPosition(mRecyclerView.getAdapter().getItemCount() - 1);
                 return true;
             }
