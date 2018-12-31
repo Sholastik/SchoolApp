@@ -181,6 +181,7 @@ public class EditorFragment extends Fragment {
                             bundle.getInt(ARG_INDEX));
 
                     Objects.requireNonNull(lesson).mStartTime = data.getLongExtra(EXTRA_START_TIME, 0);
+                    QueryHandler.updateLesson(getContext(), lesson);
                     Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemChanged(lesson.mIndex);
                         isChanged = true;
                 } else if (requestCode == REQUEST_LENGTH_TIME) {
@@ -189,7 +190,8 @@ public class EditorFragment extends Fragment {
                             bundle.getInt(ARG_DAY_OF_WEEK),
                             bundle.getInt(ARG_INDEX));
 
-                    Objects.requireNonNull(lesson).mStartTime = data.getLongExtra(EXTRA_LENGTH_TIME, 0);
+                    Objects.requireNonNull(lesson).mLength = data.getLongExtra(EXTRA_LENGTH_TIME, 0);
+                    QueryHandler.updateLesson(getContext(), lesson);
                     Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemChanged(lesson.mIndex);
                         isChanged = true;
                 }
