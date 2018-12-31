@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 
 import com.sholastik.schoolapp.ScheduleCode.Day;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class AppDatabaseSingleton {
@@ -40,7 +41,8 @@ public class AppDatabaseSingleton {
             @Override
             public void onCreate(@NonNull SupportSQLiteDatabase db) {
                 super.onCreate(db);
-                Executors.newSingleThreadExecutor()
+                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                executorService
                         .execute(new Runnable() {
                             @Override
                             public void run() {
@@ -51,6 +53,7 @@ public class AppDatabaseSingleton {
                                 }
                             }
                         });
+                executorService.shutdown();
             }
 
             @Override
