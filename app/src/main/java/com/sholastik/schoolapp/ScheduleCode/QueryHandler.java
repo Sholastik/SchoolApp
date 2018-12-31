@@ -7,12 +7,14 @@ import com.sholastik.schoolapp.AppDatabaseSingleton;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 class QueryHandler {
     static List<Day> getDays(final Context context) {
-        Future<List<Day>> future = Executors.newSingleThreadExecutor().submit(new Callable<List<Day>>() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<List<Day>> future = executorService.submit(new Callable<List<Day>>() {
             @Override
             public List<Day> call() {
                 return AppDatabaseSingleton
@@ -22,6 +24,7 @@ class QueryHandler {
                         .getDays();
             }
         });
+        executorService.shutdown();
         try {
             return future.get();
         } catch (ExecutionException | InterruptedException e) {
@@ -31,7 +34,8 @@ class QueryHandler {
     }
 
     static Day getDay(final Context context, final int dayOfWeek) {
-        Future<Day> future = Executors.newSingleThreadExecutor().submit(new Callable<Day>() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<Day> future = executorService.submit(new Callable<Day>() {
             @Override
             public Day call() {
                 return AppDatabaseSingleton
@@ -41,6 +45,7 @@ class QueryHandler {
                         .getDay(dayOfWeek);
             }
         });
+        executorService.shutdown();
         try {
             return future.get();
         } catch (ExecutionException | InterruptedException e) {
@@ -50,7 +55,8 @@ class QueryHandler {
     }
 
     static List<Lesson> getLessonsByDay(final Context context, final int dayOfWeek) {
-        Future<List<Lesson>> future = Executors.newSingleThreadExecutor().submit(new Callable<List<Lesson>>() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<List<Lesson>> future = executorService.submit(new Callable<List<Lesson>>() {
             @Override
             public List<Lesson> call() {
                 return AppDatabaseSingleton
@@ -60,6 +66,7 @@ class QueryHandler {
                         .getLessonsByDay(dayOfWeek);
             }
         });
+        executorService.shutdown();
         try {
             return future.get();
         } catch (ExecutionException | InterruptedException e) {
@@ -69,7 +76,8 @@ class QueryHandler {
     }
 
     static Lesson getLesson(final Context context, final int dayOfWeek, final int index) {
-        Future<Lesson> future = Executors.newSingleThreadExecutor().submit(new Callable<Lesson>() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<Lesson> future = executorService.submit(new Callable<Lesson>() {
             @Override
             public Lesson call() {
                 return AppDatabaseSingleton
@@ -79,6 +87,7 @@ class QueryHandler {
                         .getLesson(dayOfWeek, index);
             }
         });
+        executorService.shutdown();
         try {
             return future.get();
         } catch (ExecutionException | InterruptedException e) {
@@ -88,7 +97,8 @@ class QueryHandler {
     }
 
     static void removeLesson(final Context context, final Lesson lesson) {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(new Runnable() {
             @Override
             public void run() {
                 AppDatabaseSingleton.getSingleton(context).getAppDatabase()
@@ -96,30 +106,36 @@ class QueryHandler {
                 indexesUpdate(context, lesson.mDayOfWeek);
             }
         });
+        executorService.shutdown();
     }
 
     static void updateLesson(final Context context, final Lesson lesson) {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(new Runnable() {
             @Override
             public void run() {
                 AppDatabaseSingleton.getSingleton(context).getAppDatabase()
                         .mScheduleDao().update(lesson);
             }
         });
+        executorService.shutdown();
     }
 
     static void insertLesson(final Context context, final Lesson lesson) {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(new Runnable() {
             @Override
             public void run() {
                 AppDatabaseSingleton.getSingleton(context).getAppDatabase()
                         .mScheduleDao().insert(lesson);
             }
         });
+        executorService.shutdown();
     }
 
     private static void indexesUpdate(final Context context, final int dayOfWeek) {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(new Runnable() {
             @Override
             public void run() {
                 List<Lesson> lessons = AppDatabaseSingleton.getSingleton(context)
@@ -133,5 +149,6 @@ class QueryHandler {
                 }
             }
         });
+        executorService.shutdown();
     }
 }
