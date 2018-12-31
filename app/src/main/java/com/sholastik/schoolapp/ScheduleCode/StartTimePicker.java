@@ -48,7 +48,7 @@ public class StartTimePicker extends DialogFragment {
         if (getArguments() != null) {
             dayOfWeek = getArguments().getInt(ARG_DAY_OF_WEEK);
             index = getArguments().getInt(ARG_INDEX);
-            time.setTime(new Date(QueryHandler.getLesson(getContext(), dayOfWeek, index).mStartTime));
+            time.setTime(new Date(Objects.requireNonNull(QueryHandler.getLesson(getContext(), dayOfWeek, index)).mStartTime));
         }
 
         mTimePicker = (TimePicker) LayoutInflater.from(getActivity())

@@ -19,6 +19,7 @@ import com.sholastik.schoolapp.R;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 
 import static com.sholastik.schoolapp.ScheduleCode.StartTimePicker.ARG_DAY_OF_WEEK;
 import static com.sholastik.schoolapp.ScheduleCode.StartTimePicker.ARG_INDEX;
@@ -51,7 +52,7 @@ public class LengthTimePicker extends DialogFragment {
         if (getArguments() != null) {
             dayOfWeek = getArguments().getInt(ARG_DAY_OF_WEEK);
             index = getArguments().getInt(ARG_INDEX);
-            length.setTime(new Date(QueryHandler.getLesson(getContext(), dayOfWeek, index).mLength));
+            length.setTime(new Date(Objects.requireNonNull(QueryHandler.getLesson(getContext(), dayOfWeek, index)).mLength));
         }
         int hours = 0;
         int minutes = 0;
