@@ -21,15 +21,12 @@ public interface ScheduleDao {
     @Insert
     void insert(Day day);
 
-    @Update
-    void update(Day day);
-
-    @Delete
-    void delete(Day day);
-
     //Lessons
     @Query("SELECT * FROM lessons WHERE mDayOfWeek = :dayOfWeek ORDER BY mIndex")
     List<Lesson> getLessonsByDay(int dayOfWeek);
+
+    @Query("SELECT * FROM lessons WHERE mDayOfWeek = :dayOfWeek AND mIndex = :index")
+    Lesson getLesson(int dayOfWeek, int index);
 
     @Insert
     void insert(Lesson lesson);
