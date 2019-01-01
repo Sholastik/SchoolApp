@@ -11,19 +11,8 @@ import java.util.List;
 @Dao
 public interface ScheduleDao {
 
-    // Days
-    @Query("SELECT * FROM days")
-    List<Day> getDays();
-
-    @Query("SELECT * FROM days WHERE mDayOfWeek = :dayOfWeek")
-    Day getDay(int dayOfWeek);
-
-    @Insert
-    void insert(Day day);
-
-    //Lessons
     @Query("SELECT * FROM lessons WHERE mDayOfWeek = :dayOfWeek ORDER BY mIndex")
-    List<Lesson> getLessonsByDay(int dayOfWeek);
+    List<Lesson> getLessons(int dayOfWeek);
 
     @Query("SELECT * FROM lessons WHERE mDayOfWeek = :dayOfWeek AND mIndex = :index")
     Lesson getLesson(int dayOfWeek, int index);

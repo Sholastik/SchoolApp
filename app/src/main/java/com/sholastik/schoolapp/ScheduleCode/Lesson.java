@@ -47,12 +47,6 @@ public class Lesson {
         mName = name;
     }
 
-    Date getStartTime() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date(mStartTime));
-        return calendar.getTime();
-    }
-
     Date getEndTime() {
         Calendar endTime = Calendar.getInstance();
         endTime.setTime(new Date(mStartTime));

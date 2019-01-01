@@ -12,49 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 class QueryHandler {
-    static List<Day> getDays(final Context context) {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<List<Day>> future = executorService.submit(new Callable<List<Day>>() {
-            @Override
-            public List<Day> call() {
-                return AppDatabaseSingleton
-                        .getSingleton(context)
-                        .getAppDatabase()
-                        .mScheduleDao()
-                        .getDays();
-            }
-        });
-        executorService.shutdown();
-        try {
-            return future.get();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    static Day getDay(final Context context, final int dayOfWeek) {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<Day> future = executorService.submit(new Callable<Day>() {
-            @Override
-            public Day call() {
-                return AppDatabaseSingleton
-                        .getSingleton(context)
-                        .getAppDatabase()
-                        .mScheduleDao()
-                        .getDay(dayOfWeek);
-            }
-        });
-        executorService.shutdown();
-        try {
-            return future.get();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    static List<Lesson> getLessonsByDay(final Context context, final int dayOfWeek) {
+    static List<Lesson> getLessons(final Context context, final int dayOfWeek) {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<List<Lesson>> future = executorService.submit(new Callable<List<Lesson>>() {
             @Override
@@ -63,7 +21,7 @@ class QueryHandler {
                         .getSingleton(context)
                         .getAppDatabase()
                         .mScheduleDao()
-                        .getLessonsByDay(dayOfWeek);
+                        .getLessons(dayOfWeek);
             }
         });
         executorService.shutdown();
@@ -141,7 +99,7 @@ class QueryHandler {
                 List<Lesson> lessons = AppDatabaseSingleton.getSingleton(context)
                         .getAppDatabase()
                         .mScheduleDao()
-                        .getLessonsByDay(dayOfWeek);
+                        .getLessons(dayOfWeek);
                 for (int i = 0; i < lessons.size(); i++) {
                     Lesson lesson = lessons.get(i);
                     lesson.mIndex = i;

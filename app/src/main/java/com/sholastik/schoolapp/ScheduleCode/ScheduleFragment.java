@@ -18,7 +18,6 @@ import com.sholastik.schoolapp.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Objects;
 
 import static com.sholastik.schoolapp.ScheduleCode.EditorActivity.TO_BE_UPDATED;
 
@@ -43,42 +42,41 @@ public class ScheduleFragment extends Fragment {
     }
 
     private class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private Day mDay;
         private TextView mDayOfWeekTextView;
         private TextView mLessonsTextView;
         private TextView mNoLessonsTextView;
+        private int mDayOfWeek;
 
-        ViewHolder(LayoutInflater inflater, ViewGroup viewGroup, String name) {
+        ViewHolder(LayoutInflater inflater, ViewGroup viewGroup) {
             super(inflater.inflate(R.layout.schedule_item_day, viewGroup, false));
             itemView.setOnClickListener(this);
             mDayOfWeekTextView = itemView.findViewById(R.id.day_of_week);
             mLessonsTextView = itemView.findViewById(R.id.lessons_text_view);
             mNoLessonsTextView = itemView.findViewById(R.id.no_lessons_text_view);
-            mDayOfWeekTextView.setText(name);
         }
 
-        void bind() {
-            mDay = QueryHandler.getDay(getContext(), getAdapterPosition());
-            if (Objects.requireNonNull(QueryHandler.getLessonsByDay(getContext(), mDay.mDayOfWeek)).size() == 0) {
+        void bind(int i) {
+            mDayOfWeek = i;
+            mDayOfWeekTextView.setText(getResources().getStringArray(R.array.day_of_week)[mDayOfWeek]);
+            mLessonsTextView.setText("");
+            if (QueryHandler.getLessons(getContext(), mDayOfWeek) == null | QueryHandler.getLessons(getContext(), mDayOfWeek).size() == 0) {
                 mLessonsTextView.setVisibility(View.INVISIBLE);
                 mNoLessonsTextView.setVisibility(View.VISIBLE);
                 mNoLessonsTextView.setText(R.string.no_lessons);
-                mLessonsTextView.setText("");
                 return;
             } else {
                 mLessonsTextView.setVisibility(View.VISIBLE);
                 mNoLessonsTextView.setVisibility(View.INVISIBLE);
                 mNoLessonsTextView.setText("");
-                mLessonsTextView.setText("");
             }
 
             //TODO: Rewrite this whole crap!
-            for (Lesson lesson : Objects.requireNonNull(QueryHandler.getLessonsByDay(getContext(), mDay.mDayOfWeek))) {
+            for (Lesson lesson : QueryHandler.getLessons(getContext(), mDayOfWeek)) {
                 String order = getString(R.string.schedule_order, lesson.mIndex + 1);
                 String name = lesson.mName;
                 String time = getString(
                         R.string.schedule_time,
-                        new SimpleDateFormat("H:mm", Locale.getDefault()).format(lesson.getStartTime()),
+                        new SimpleDateFormat("H:mm", Locale.getDefault()).format(lesson.mStartTime),
                         new SimpleDateFormat("H:mm", Locale.getDefault()).format(lesson.getEndTime())
                 );
                 mLessonsTextView.append(String.format("%s    %s    %s\n", order, name, time));
@@ -87,36 +85,27 @@ public class ScheduleFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Intent intent = EditorActivity.getIntent(getContext(), mDay.mDayOfWeek);
+            Intent intent = EditorActivity.getIntent(getContext(), mDayOfWeek);
             startActivityForResult(intent, REQUEST_CODE);
         }
     }
 
     private class Adapter extends RecyclerView.Adapter<ViewHolder> {
-        int mI;
-
-        private Adapter() {
-            mI = 0;
-        }
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            return new ViewHolder(layoutInflater, viewGroup, Objects.requireNonNull(QueryHandler.getDay(getContext(), mI++)).mName);
+            return new ViewHolder(layoutInflater, viewGroup);
         }
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-            viewHolder.bind();
+            viewHolder.bind(i);
         }
 
         @Override
         public int getItemCount() {
-            if (Objects.requireNonNull(QueryHandler.getDays(getContext())).size() == 0) {
-                Objects.requireNonNull(getActivity()).getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, new ScheduleFragment()).commit();
-                return 0;
-            }
-            return Objects.requireNonNull(QueryHandler.getDays(getContext())).size();
+            return getResources().getStringArray(R.array.day_of_week).length;
         }
     }
 

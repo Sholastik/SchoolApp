@@ -37,7 +37,7 @@ public class EditorActivity extends AppCompatActivity {
         int index = getIntent().getIntExtra(INDEX_EXTRA, 0);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
-        setTitle(QueryHandler.getDay(EditorActivity.this, index).mName);
+        setTitle(getResources().getStringArray(R.array.day_of_week)[index]);
 
         mEditorFragments = new ArrayList<>();
         ViewPager viewPager = findViewById(R.id.editor_view_pager);
@@ -53,9 +53,10 @@ public class EditorActivity extends AppCompatActivity {
 
             @Override
             public int getCount() {
-                return QueryHandler.getDays(EditorActivity.this).size();
+                return getResources().getStringArray(R.array.day_of_week).length;
             }
         });
+
         viewPager.setCurrentItem(index);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -65,7 +66,7 @@ public class EditorActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int i) {
-                setTitle(QueryHandler.getDay(EditorActivity.this, i).mName);
+                setTitle(getResources().getStringArray(R.array.day_of_week)[i]);
             }
 
             @Override
@@ -108,4 +109,3 @@ public class EditorActivity extends AppCompatActivity {
         return super.dispatchTouchEvent(event);
     }
 }
-

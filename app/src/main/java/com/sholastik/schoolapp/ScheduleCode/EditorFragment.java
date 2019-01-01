@@ -25,9 +25,7 @@ import android.widget.TextView;
 import com.sholastik.schoolapp.R;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import static com.sholastik.schoolapp.ScheduleCode.LengthTimePicker.EXTRA_LENGTH_TIME;
 import static com.sholastik.schoolapp.ScheduleCode.StartTimePicker.ARG_DAY_OF_WEEK;
@@ -55,7 +53,6 @@ public class EditorFragment extends Fragment {
     private RecyclerView mRecyclerView;
     public int mDayIndex;
     public boolean isChanged;
-    private List<Lesson> mLessonList;
 
     @Nullable
     @Override
@@ -65,7 +62,7 @@ public class EditorFragment extends Fragment {
         mRecyclerView = view.findViewById(R.id.editor_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setItemViewCacheSize(30);
+        mRecyclerView.setItemViewCacheSize(10);
         assert getArguments() != null;
         mDayIndex = getArguments().getInt(DAY_EXTRA, 0);
         isChanged = false;
@@ -95,13 +92,12 @@ public class EditorFragment extends Fragment {
             mStartTimeButton.setOnClickListener(this);
             mLengthButton.setOnClickListener(this);
             mRemoveLesson.setOnClickListener(this);
-
             mLessonNameEditText.addTextChangedListener(this);
         }
 
-        void bind(Lesson lesson) {
-            mLesson = lesson;
-            mLessonNameEditText.setText(Objects.requireNonNull(mLesson).mName);
+        void bind(int i) {
+            mLesson = QueryHandler.getLesson(getContext(), mDayIndex, i);
+            mLessonNameEditText.setText(mLesson.mName);
             mLessonOrder.setText(getString(R.string.schedule_order, mLesson.mIndex + 1));
 
             mLengthButton.setText(getString(R.string.lesson_length, Integer.parseInt(new SimpleDateFormat("H", Locale.getDefault()).format(mLesson.mLength)) * 60 +
@@ -124,9 +120,8 @@ public class EditorFragment extends Fragment {
                 assert fragmentManager != null;
                 lengthTimePicker.show(fragmentManager, DIALOG_LENGTH_TIME);
             } else if (view == mRemoveLesson) {
-                mLessonList.remove(mLesson);
                 QueryHandler.removeLesson(getContext(), mLesson);
-                Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemRemoved(mLesson.mIndex);
+                mRecyclerView.getAdapter().notifyItemRemoved(mLesson.mIndex);
                 mRecyclerView.getAdapter().notifyItemRangeChanged(mLesson.mIndex, mRecyclerView.getAdapter().getItemCount() - mLesson.mIndex);
                 isChanged = true;
             }
@@ -151,9 +146,6 @@ public class EditorFragment extends Fragment {
     }
 
     private class Adapter extends RecyclerView.Adapter<ViewHolder> {
-        private Adapter() {
-            mLessonList = QueryHandler.getLessonsByDay(getContext(), mDayIndex);
-        }
 
         @NonNull
         @Override
@@ -164,12 +156,16 @@ public class EditorFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-            viewHolder.bind(mLessonList.get(i));
+            viewHolder.bind(i);
         }
 
         @Override
         public int getItemCount() {
-            return mLessonList.size();
+            if (QueryHandler.getLessons(getContext(), mDayIndex) == null) {
+                return 0;
+            } else {
+                return QueryHandler.getLessons(getContext(), mDayIndex).size();
+            }
         }
 
 
@@ -188,21 +184,19 @@ public class EditorFragment extends Fragment {
                     Lesson lesson = QueryHandler.getLesson(getContext(),
                             bundle.getInt(ARG_DAY_OF_WEEK),
                             bundle.getInt(ARG_INDEX));
-                    mLessonList.get(bundle.getInt(ARG_INDEX)).mStartTime = data.getLongExtra(EXTRA_START_TIME, 0);
-                    Objects.requireNonNull(lesson).mStartTime = data.getLongExtra(EXTRA_START_TIME, 0);
+                    lesson.mStartTime = data.getLongExtra(EXTRA_START_TIME, 0);
                     QueryHandler.updateLesson(getContext(), lesson);
-                    Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemChanged(lesson.mIndex);
+                    mRecyclerView.getAdapter().notifyItemChanged(lesson.mIndex);
                         isChanged = true;
                 } else if (requestCode == REQUEST_LENGTH_TIME) {
                     Bundle bundle = data.getBundleExtra(EXTRA_BUNDLE);
                     Lesson lesson = QueryHandler.getLesson(getContext(),
                             bundle.getInt(ARG_DAY_OF_WEEK),
                             bundle.getInt(ARG_INDEX));
-                    mLessonList.get(bundle.getInt(ARG_INDEX)).mLength = data.getLongExtra(EXTRA_LENGTH_TIME, 0);
-                    Objects.requireNonNull(lesson).mLength = data.getLongExtra(EXTRA_LENGTH_TIME, 0);
+                    lesson.mLength = data.getLongExtra(EXTRA_LENGTH_TIME, 0);
                     QueryHandler.updateLesson(getContext(), lesson);
-                    Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemChanged(lesson.mIndex);
-                        isChanged = true;
+                    mRecyclerView.getAdapter().notifyItemChanged(lesson.mIndex);
+                    isChanged = true;
                 }
             }
         }
@@ -224,12 +218,10 @@ public class EditorFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.new_lesson: {
-                int index = Objects.requireNonNull(mRecyclerView.getAdapter()).getItemCount();
-                Lesson lesson = new Lesson(Objects.requireNonNull(getContext()), mDayIndex, index);
-                QueryHandler.insertLesson(getContext(), lesson);
-                mLessonList.add(lesson);
+                QueryHandler.insertLesson(getContext(), new Lesson(getContext(), mDayIndex,
+                        mRecyclerView.getAdapter().getItemCount()));
                 isChanged = true;
-                Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemInserted(mRecyclerView.getAdapter().getItemCount());
+                mRecyclerView.getAdapter().notifyItemInserted(mRecyclerView.getAdapter().getItemCount());
                 mRecyclerView.scrollToPosition(mRecyclerView.getAdapter().getItemCount() - 1);
                 return true;
             }
