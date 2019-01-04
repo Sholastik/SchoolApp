@@ -18,7 +18,6 @@
         <item>Суббота</item>
         <item>Воскресенье</item>
     </string-array>
-    <string name="time">%s:%s</string>
     <string name="editor_lesson_tip">Название урока</string>
     <string name="editor_start_of_lesson_tip">Время начала урока</string>
     <string name="editor_length_of_lesson_tip">Продолжительность урока</string>

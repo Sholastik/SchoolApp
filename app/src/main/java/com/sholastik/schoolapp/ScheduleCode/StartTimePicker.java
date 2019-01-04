@@ -17,18 +17,22 @@ import android.widget.TimePicker;
 import com.sholastik.schoolapp.R;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
 
 public class StartTimePicker extends DialogFragment {
 
     public static final String EXTRA_START_TIME = "com.sholastik.android.schoolapp.time";
-    public static final String ARG_TIME = "calendar";
+    public static final String EXTRA_BUNDLE = "com.sholastik.andorid.schoolapp.bundle";
+    public static final String ARG_DAY_OF_WEEK = "dayOfWeek";
+    public static final String ARG_INDEX = "index";
 
     private TimePicker mTimePicker;
 
-    public static StartTimePicker newInstance(Calendar calendar) {
+    public static StartTimePicker newInstance(int dayOfWeek, int index) {
         Bundle args = new Bundle();
-        args.putSerializable(ARG_TIME, calendar);
+        args.putInt(ARG_DAY_OF_WEEK, dayOfWeek);
+        args.putInt(ARG_INDEX, index);
 
         StartTimePicker startTimePicker = new StartTimePicker();
         startTimePicker.setArguments(args);
@@ -39,9 +43,12 @@ public class StartTimePicker extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        Calendar time = null;
+        Calendar time = Calendar.getInstance();
+        int dayOfWeek, index;
         if (getArguments() != null) {
-            time = (Calendar) getArguments().getSerializable(ARG_TIME);
+            dayOfWeek = getArguments().getInt(ARG_DAY_OF_WEEK);
+            index = getArguments().getInt(ARG_INDEX);
+            time.setTime(new Date(Objects.requireNonNull(QueryHandler.getLesson(getContext(), dayOfWeek, index)).mStartTime));
         }
 
         mTimePicker = (TimePicker) LayoutInflater.from(getActivity())
@@ -50,7 +57,7 @@ public class StartTimePicker extends DialogFragment {
         int hours = 0;
         int minutes = 0;
         if (time != null) {
-            hours = time.get(Calendar.HOUR_OF_DAY);
+            hours = time.get(Calendar.HOUR);
             minutes = time.get(Calendar.MINUTE);
         }
 
@@ -91,7 +98,8 @@ public class StartTimePicker extends DialogFragment {
         if (getTargetFragment() == null) return;
 
         Intent intent = new Intent();
-        intent.putExtra(EXTRA_START_TIME, calendar);
+        intent.putExtra(EXTRA_START_TIME, calendar.getTime().getTime());
+        intent.putExtra(EXTRA_BUNDLE, getArguments());
 
         getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode, intent);
     }

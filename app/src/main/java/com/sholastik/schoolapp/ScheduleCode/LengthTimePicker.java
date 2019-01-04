@@ -18,19 +18,25 @@ import com.sholastik.schoolapp.R;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Objects;
+
+import static com.sholastik.schoolapp.ScheduleCode.StartTimePicker.ARG_DAY_OF_WEEK;
+import static com.sholastik.schoolapp.ScheduleCode.StartTimePicker.ARG_INDEX;
+import static com.sholastik.schoolapp.ScheduleCode.StartTimePicker.EXTRA_BUNDLE;
 
 public class LengthTimePicker extends DialogFragment {
 
-    public static final String ARGS_LENGTH = "length";
     public static final String EXTRA_LENGTH_TIME = "com.sholastik.schoolapp.ScheduleCode.LengthTimePicker";
 
     private View mView;
     private NumberPicker mHoursPicker;
     private NumberPicker mMinutesPicker;
 
-    public static LengthTimePicker getInstance(Calendar length) {
+    public static LengthTimePicker getInstance(int dayOfWeek, int index) {
         Bundle bundle = new Bundle();
-        bundle.putSerializable(ARGS_LENGTH, length);
+        bundle.putInt(ARG_DAY_OF_WEEK, dayOfWeek);
+        bundle.putInt(ARG_INDEX, index);
 
         LengthTimePicker lengthTimePicker = new LengthTimePicker();
         lengthTimePicker.setArguments(bundle);
@@ -41,9 +47,12 @@ public class LengthTimePicker extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        Calendar length = null;
+        Calendar length = Calendar.getInstance();
+        int dayOfWeek, index;
         if (getArguments() != null) {
-            length = (Calendar) getArguments().getSerializable(ARGS_LENGTH);
+            dayOfWeek = getArguments().getInt(ARG_DAY_OF_WEEK);
+            index = getArguments().getInt(ARG_INDEX);
+            length.setTime(new Date(Objects.requireNonNull(QueryHandler.getLesson(getContext(), dayOfWeek, index)).mLength));
         }
         int hours = 0;
         int minutes = 0;
@@ -95,7 +104,8 @@ public class LengthTimePicker extends DialogFragment {
         if (getTargetFragment() == null) return;
 
         Intent intent = new Intent();
-        intent.putExtra(EXTRA_LENGTH_TIME, length);
+        intent.putExtra(EXTRA_LENGTH_TIME, length.getTime().getTime());
+        intent.putExtra(EXTRA_BUNDLE, getArguments());
 
         getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode, intent);
     }

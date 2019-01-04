@@ -25,20 +25,23 @@ import android.widget.TextView;
 import com.sholastik.schoolapp.R;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Objects;
+import java.util.List;
+import java.util.Locale;
 
 import static com.sholastik.schoolapp.ScheduleCode.LengthTimePicker.EXTRA_LENGTH_TIME;
+import static com.sholastik.schoolapp.ScheduleCode.StartTimePicker.ARG_DAY_OF_WEEK;
+import static com.sholastik.schoolapp.ScheduleCode.StartTimePicker.ARG_INDEX;
+import static com.sholastik.schoolapp.ScheduleCode.StartTimePicker.EXTRA_BUNDLE;
 import static com.sholastik.schoolapp.ScheduleCode.StartTimePicker.EXTRA_START_TIME;
 
 public class EditorFragment extends Fragment {
 
-    public static final String DAY_EXTRA = "com.sholastik.schoolapp.ScheduleCode.EditorFragment";
-    public static final String DIALOG_START_TIME = "DialogStartTime";
-    public static final String DIALOG_LENGTH_TIME = "DialogLengthTime";
+    private static final String DAY_EXTRA = "com.sholastik.schoolapp.ScheduleCode.EditorFragment";
+    private static final String DIALOG_START_TIME = "DialogStartTime";
+    private static final String DIALOG_LENGTH_TIME = "DialogLengthTime";
 
-    public static final int REQUEST_START_TIME = 0;
-    public static final int REQUEST_LENGTH_TIME = 910521590;
+    private static final int REQUEST_START_TIME = 0;
+    private static final int REQUEST_LENGTH_TIME = 1;
 
     public static Fragment getFragment(int dayIndex) {
         Fragment fragment = new EditorFragment();
@@ -49,10 +52,9 @@ public class EditorFragment extends Fragment {
     }
 
     private RecyclerView mRecyclerView;
-    private Day mDay;
-    private Adapter mAdapter;
     public int mDayIndex;
     public boolean isChanged;
+    private List<Lesson> mLessonList;
 
     @Nullable
     @Override
@@ -61,8 +63,9 @@ public class EditorFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_editor, container, false);
         mRecyclerView = view.findViewById(R.id.editor_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setItemViewCacheSize(30);
         assert getArguments() != null;
-        mDay = Schedule.get(getContext()).getDay(getArguments().getInt(DAY_EXTRA, 0));
         mDayIndex = getArguments().getInt(DAY_EXTRA, 0);
         isChanged = false;
         updateUI();
@@ -72,13 +75,12 @@ public class EditorFragment extends Fragment {
 
 
     private class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, TextWatcher {
-        private Button mStartTimeButton;
-        private Button mLengthButton;
-        private EditText mLessonNameEditText;
-        private TextView mLessonOrder;
+        private final Button mStartTimeButton;
+        private final Button mLengthButton;
+        private final EditText mLessonNameEditText;
+        private final TextView mLessonOrder;
         private Lesson mLesson;
-        private ImageView mRemoveLesson;
-        private int mIndex;
+        private final ImageView mRemoveLesson;
 
         ViewHolder(LayoutInflater inflater, ViewGroup viewGroup) {
             super(inflater.inflate(R.layout.editor_item, viewGroup, false));
@@ -88,45 +90,43 @@ public class EditorFragment extends Fragment {
             mLessonNameEditText = itemView.findViewById(R.id.editor_lesson_name);
             mLessonOrder = itemView.findViewById(R.id.editor_item_index);
             mRemoveLesson = itemView.findViewById(R.id.editor_remove_lesson);
-        }
-
-        void bind(Lesson lesson, int index) {
-            mIndex = index;
-            mLesson = lesson;
-            mLessonNameEditText.setText(mLesson.getName());
-            mLessonOrder.setText(getString(R.string.schedule_order, mIndex + 1));
-            int length = lesson.getLength().get(Calendar.HOUR_OF_DAY) * 60 + lesson.getLength().get(Calendar.MINUTE);
-            mLengthButton.setText(getString(R.string.lesson_length, length));
-            mStartTimeButton.setText(new SimpleDateFormat("H:mm").format(lesson.getStartTime().getTime()));
 
             mStartTimeButton.setOnClickListener(this);
             mLengthButton.setOnClickListener(this);
             mRemoveLesson.setOnClickListener(this);
-
             mLessonNameEditText.addTextChangedListener(this);
+        }
+
+        void bind(int i) {
+            mLesson = mLessonList.get(i);
+            mLessonNameEditText.setText(mLesson.mName);
+            mLessonOrder.setText(getString(R.string.schedule_order, mLesson.mIndex + 1));
+
+            mLengthButton.setText(getString(R.string.lesson_length, Integer.parseInt(new SimpleDateFormat("H", Locale.getDefault()).format(mLesson.mLength)) * 60 +
+                    Integer.parseInt(new SimpleDateFormat("mm", Locale.getDefault()).format(mLesson.mLength))));
+            mStartTimeButton.setText(new SimpleDateFormat("H:mm", Locale.getDefault()).format(mLesson.mStartTime));
         }
 
         @Override
         public void onClick(View view) {
             if (view == mStartTimeButton) {
                 FragmentManager fragmentManager = getFragmentManager();
-                StartTimePicker startTimePicker = StartTimePicker.newInstance(mLesson.getStartTime());
-                startTimePicker.setTargetFragment(EditorFragment.this, REQUEST_START_TIME + mIndex);
+                StartTimePicker startTimePicker = StartTimePicker.newInstance(mLesson.mDayOfWeek, mLesson.mIndex);
+                startTimePicker.setTargetFragment(EditorFragment.this, REQUEST_START_TIME);
                 assert fragmentManager != null;
                 startTimePicker.show(fragmentManager, DIALOG_START_TIME);
             } else if (view == mLengthButton) {
                 FragmentManager fragmentManager = getFragmentManager();
-                LengthTimePicker lengthTimePicker = LengthTimePicker.getInstance(mLesson.getLength());
-                lengthTimePicker.setTargetFragment(EditorFragment.this, REQUEST_LENGTH_TIME + mIndex);
+                LengthTimePicker lengthTimePicker = LengthTimePicker.getInstance(mLesson.mDayOfWeek, mLesson.mIndex);
+                lengthTimePicker.setTargetFragment(EditorFragment.this, REQUEST_LENGTH_TIME);
                 assert fragmentManager != null;
                 lengthTimePicker.show(fragmentManager, DIALOG_LENGTH_TIME);
             } else if (view == mRemoveLesson) {
-                try {
-                    mDay.removeLesson(mIndex);
-                } catch (IndexOutOfBoundsException ignored) {
-                }
-                Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemRemoved(mIndex);
-                mRecyclerView.getAdapter().notifyItemRangeChanged(mIndex, mRecyclerView.getAdapter().getItemCount() - mIndex);
+                QueryHandler.removeLesson(getContext(), mLesson);
+                mLessonList.remove(mLesson);
+                indexesUpdate();
+                mRecyclerView.getAdapter().notifyItemRemoved(mLesson.mIndex);
+                mRecyclerView.getAdapter().notifyItemRangeChanged(mLesson.mIndex, mRecyclerView.getAdapter().getItemCount() - mLesson.mIndex);
                 isChanged = true;
             }
         }
@@ -138,7 +138,8 @@ public class EditorFragment extends Fragment {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            mLesson.setName(s.toString());
+            mLesson.mName = s.toString();
+            QueryHandler.updateLesson(getContext(), mLesson);
             isChanged = true;
         }
 
@@ -149,10 +150,9 @@ public class EditorFragment extends Fragment {
     }
 
     private class Adapter extends RecyclerView.Adapter<ViewHolder> {
-        private Day mDay;
 
-        Adapter(Day day) {
-            mDay = day;
+        private Adapter(List<Lesson> lessons) {
+            mLessonList = lessons;
         }
 
         @NonNull
@@ -164,38 +164,45 @@ public class EditorFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-            viewHolder.bind(mDay.getLesson(i), i);
+            viewHolder.bind(i);
         }
 
         @Override
         public int getItemCount() {
-            return mDay.size();
+            return mLessonList.size();
         }
 
 
     }
 
     private void updateUI() {
-        mAdapter = new Adapter(mDay);
-        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setAdapter(new Adapter(QueryHandler.getLessons(getContext(), mDayIndex)));
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
             if (data != null) {
-                for (int i = 0; i < Objects.requireNonNull(mRecyclerView.getAdapter()).getItemCount(); i++) {
-                    if (requestCode - i == REQUEST_START_TIME) {
-                        mDay.getLesson(i).setStartTime((Calendar) data.getSerializableExtra(EXTRA_START_TIME));
-                        mRecyclerView.getAdapter().notifyItemChanged(i);
+                if (requestCode == REQUEST_START_TIME) {
+                    Bundle bundle = data.getBundleExtra(EXTRA_BUNDLE);
+                    Lesson lesson = QueryHandler.getLesson(getContext(),
+                            bundle.getInt(ARG_DAY_OF_WEEK),
+                            bundle.getInt(ARG_INDEX));
+                    mLessonList.get(bundle.getInt(ARG_INDEX)).mStartTime = data.getLongExtra(EXTRA_START_TIME, 0);
+                    lesson.mStartTime = data.getLongExtra(EXTRA_START_TIME, 0);
+                    QueryHandler.updateLesson(getContext(), lesson);
+                    mRecyclerView.getAdapter().notifyItemChanged(lesson.mIndex);
                         isChanged = true;
-                        break;
-                    } else if (requestCode - i == REQUEST_LENGTH_TIME) {
-                        mDay.getLesson(i).setLength((Calendar) data.getSerializableExtra(EXTRA_LENGTH_TIME));
-                        mRecyclerView.getAdapter().notifyItemChanged(i);
-                        isChanged = true;
-                        break;
-                    }
+                } else if (requestCode == REQUEST_LENGTH_TIME) {
+                    Bundle bundle = data.getBundleExtra(EXTRA_BUNDLE);
+                    Lesson lesson = QueryHandler.getLesson(getContext(),
+                            bundle.getInt(ARG_DAY_OF_WEEK),
+                            bundle.getInt(ARG_INDEX));
+                    mLessonList.get(bundle.getInt(ARG_INDEX)).mLength = data.getLongExtra(EXTRA_LENGTH_TIME, 0);
+                    lesson.mLength = data.getLongExtra(EXTRA_LENGTH_TIME, 0);
+                    QueryHandler.updateLesson(getContext(), lesson);
+                    mRecyclerView.getAdapter().notifyItemChanged(lesson.mIndex);
+                    isChanged = true;
                 }
             }
         }
@@ -217,14 +224,23 @@ public class EditorFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.new_lesson: {
-                mDay.addLesson(getContext());
+                Lesson lesson = new Lesson(getContext(), mDayIndex,
+                        mRecyclerView.getAdapter().getItemCount());
+                mLessonList.add(lesson);
+                QueryHandler.insertLesson(getContext(), lesson);
                 isChanged = true;
-                Objects.requireNonNull(mRecyclerView.getAdapter()).notifyItemInserted(mDay.size() - 1);
-                mRecyclerView.scrollToPosition(mDay.size() - 1);
+                mRecyclerView.getAdapter().notifyItemInserted(mRecyclerView.getAdapter().getItemCount());
+                mRecyclerView.scrollToPosition(mRecyclerView.getAdapter().getItemCount() - 1);
                 return true;
             }
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void indexesUpdate() {
+        for (int n = 0; n < mLessonList.size(); n++) {
+            mLessonList.get(n).mIndex = n;
         }
     }
 }

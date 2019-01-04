@@ -23,10 +23,6 @@ public class EditorActivity extends AppCompatActivity {
     public static final String INDEX_EXTRA = "com.sholastik.schoolapp.ScheduleCode.EditorActivity";
     public static final String TO_BE_UPDATED = "to_be_updated";
 
-    private int mIndex;
-
-    private ViewPager mViewPager;
-    private Day[] mDays;
     private ArrayList<EditorFragment> mEditorFragments;
 
     public static Intent getIntent(Context context, int index) {
@@ -38,16 +34,16 @@ public class EditorActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
-        mIndex = getIntent().getIntExtra(INDEX_EXTRA, 0);
+        int index = getIntent().getIntExtra(INDEX_EXTRA, 0);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
-        setTitle(getResources().getStringArray(R.array.day_of_week)[mIndex]);
+        setTitle(getResources().getStringArray(R.array.day_of_week)[index]);
+
         mEditorFragments = new ArrayList<>();
-        mViewPager = findViewById(R.id.editor_view_pager);
-        mDays = Schedule.get(EditorActivity.this).getDays();
+        ViewPager viewPager = findViewById(R.id.editor_view_pager);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
+        viewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
             @Override
             public Fragment getItem(int i) {
                 EditorFragment editorFragment = (EditorFragment) EditorFragment.getFragment(i);
@@ -57,11 +53,12 @@ public class EditorActivity extends AppCompatActivity {
 
             @Override
             public int getCount() {
-                return mDays.length;
+                return getResources().getStringArray(R.array.day_of_week).length;
             }
         });
-        mViewPager.setCurrentItem(mIndex);
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+        viewPager.setCurrentItem(index);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i1) {
 
@@ -112,4 +109,3 @@ public class EditorActivity extends AppCompatActivity {
         return super.dispatchTouchEvent(event);
     }
 }
-
